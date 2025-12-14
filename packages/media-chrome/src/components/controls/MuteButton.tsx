@@ -1,38 +1,163 @@
-import React from 'react';
-import { useMediaDispatch, useMediaSelector } from 'media-chrome/react/media-store';
-import { MediaActionTypes } from '../../types';
+import React, { createContext, useContext } from 'react';
 import type { MediaMuteButtonProps } from '../../types';
 import { Slot } from '../../utils/Slot';
+import { mergeProps } from '../../utils/merge-props';
+import { useMediaMuteToggle } from '../../hooks';
 
-export const MediaMuteButton: React.FC<MediaMuteButtonProps> = (props) => {
-  const { children, onClick, asChild, ...restProps } = props;
-  const dispatch = useMediaDispatch();
-  const volumeLevel = useMediaSelector((state) => state.mediaVolumeLevel) ?? 'high';
-  const isMuted = volumeLevel === 'off';
+interface MuteButtonContextValue {
+  isMuted: boolean;
+  volumeLevel: string;
+  toggleMute: () => void;
+}
 
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    const type = isMuted
-      ? MediaActionTypes.MEDIA_UNMUTE_REQUEST
-      : MediaActionTypes.MEDIA_MUTE_REQUEST;
-    dispatch({ type });
-    onClick?.(e);
-  };
+const MuteButtonContext = createContext<MuteButtonContextValue | null>(null);
 
-  // Render props pattern
-  if (typeof children === 'function') {
-    return <>{children({ isMuted, volumeLevel, onClick: handleClick })}</>;
+function useMuteButtonContext() {
+  const context = useContext(MuteButtonContext);
+  if (!context) {
+    throw new Error('MuteButton compound components must be used within MuteButton.Root');
   }
+  return context;
+}
+
+interface MuteButtonRootProps {
+  children: React.ReactNode;
+}
+
+function MuteButtonRoot({ children }: MuteButtonRootProps) {
+  const { isMuted, volumeLevel, toggleMute } = useMediaMuteToggle();
+
+  return (
+    <MuteButtonContext.Provider value={{ isMuted, volumeLevel, toggleMute }}>
+      {children}
+    </MuteButtonContext.Provider>
+  );
+}
+
+interface ConditionalProps extends Omit<MediaMuteButtonProps, 'children'> {
+  children?: React.ReactNode;
+}
+
+function Muted(props: ConditionalProps) {
+  const { children, asChild, ...restProps } = props;
+  const { isMuted, toggleMute } = useMuteButtonContext();
+
+  if (!isMuted) return null;
 
   const Comp = asChild ? Slot : 'button';
 
-  return (
-    <Comp
-      type="button"
-      {...restProps}
-      onClick={handleClick}
-      aria-label={isMuted ? 'Unmute' : 'Mute'}
-    >
-      {children ?? (isMuted ? 'Unmute' : 'Mute')}
-    </Comp>
-  );
+  const baseProps: React.ComponentPropsWithoutRef<'button'> = {
+    type: 'button',
+    onClick: toggleMute,
+    'aria-label': 'Unmute',
+  };
+
+  const mergedProps = mergeProps(baseProps, restProps);
+
+  return <Comp {...mergedProps}>{children}</Comp>;
+}
+
+function Unmuted(props: ConditionalProps) {
+  const { children, asChild, ...restProps } = props;
+  const { isMuted, toggleMute } = useMuteButtonContext();
+
+  if (isMuted) return null;
+
+  const Comp = asChild ? Slot : 'button';
+
+  const baseProps: React.ComponentPropsWithoutRef<'button'> = {
+    type: 'button',
+    onClick: toggleMute,
+    'aria-label': 'Mute',
+  };
+
+  const mergedProps = mergeProps(baseProps, restProps);
+
+  return <Comp {...mergedProps}>{children}</Comp>;
+}
+
+function VolumeHigh(props: ConditionalProps) {
+  const { children, asChild, ...restProps } = props;
+  const { volumeLevel, toggleMute } = useMuteButtonContext();
+
+  if (volumeLevel !== 'high') return null;
+
+  const Comp = asChild ? Slot : 'button';
+
+  const baseProps: React.ComponentPropsWithoutRef<'button'> = {
+    type: 'button',
+    onClick: toggleMute,
+    'aria-label': 'Mute',
+  };
+
+  const mergedProps = mergeProps(baseProps, restProps);
+
+  return <Comp {...mergedProps}>{children}</Comp>;
+}
+
+function VolumeMedium(props: ConditionalProps) {
+  const { children, asChild, ...restProps } = props;
+  const { volumeLevel, toggleMute } = useMuteButtonContext();
+
+  if (volumeLevel !== 'medium') return null;
+
+  const Comp = asChild ? Slot : 'button';
+
+  const baseProps: React.ComponentPropsWithoutRef<'button'> = {
+    type: 'button',
+    onClick: toggleMute,
+    'aria-label': 'Mute',
+  };
+
+  const mergedProps = mergeProps(baseProps, restProps);
+
+  return <Comp {...mergedProps}>{children}</Comp>;
+}
+
+function VolumeLow(props: ConditionalProps) {
+  const { children, asChild, ...restProps } = props;
+  const { volumeLevel, toggleMute } = useMuteButtonContext();
+
+  if (volumeLevel !== 'low') return null;
+
+  const Comp = asChild ? Slot : 'button';
+
+  const baseProps: React.ComponentPropsWithoutRef<'button'> = {
+    type: 'button',
+    onClick: toggleMute,
+    'aria-label': 'Mute',
+  };
+
+  const mergedProps = mergeProps(baseProps, restProps);
+
+  return <Comp {...mergedProps}>{children}</Comp>;
+}
+
+function VolumeOff(props: ConditionalProps) {
+  const { children, asChild, ...restProps } = props;
+  const { volumeLevel, toggleMute } = useMuteButtonContext();
+
+  if (volumeLevel !== 'off') return null;
+
+  const Comp = asChild ? Slot : 'button';
+
+  const baseProps: React.ComponentPropsWithoutRef<'button'> = {
+    type: 'button',
+    onClick: toggleMute,
+    'aria-label': 'Unmute',
+  };
+
+  const mergedProps = mergeProps(baseProps, restProps);
+
+  return <Comp {...mergedProps}>{children}</Comp>;
+}
+
+export const MediaMuteButton = {
+  Root: MuteButtonRoot,
+  Muted,
+  Unmuted,
+  VolumeHigh,
+  VolumeMedium,
+  VolumeLow,
+  VolumeOff,
 };

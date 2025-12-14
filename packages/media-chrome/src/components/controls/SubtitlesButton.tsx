@@ -1,52 +1,126 @@
-import React from 'react';
-import { useMediaDispatch, useMediaSelector } from 'media-chrome/react/media-store';
-import { MediaActionTypes } from '../../types';
+import React, { createContext, useContext } from 'react';
 import type { MediaSubtitlesButtonProps } from '../../types';
 import { Slot } from '../../utils/Slot';
+import { mergeProps } from '../../utils/merge-props';
+import { useMediaSubtitlesToggle } from '../../hooks';
 
-export const MediaSubtitlesButton: React.FC<MediaSubtitlesButtonProps> = (props) => {
-  const { children, onClick, asChild, ...restProps } = props;
-  const dispatch = useMediaDispatch();
-  const subtitlesList = useMediaSelector((state) => state.mediaSubtitlesList) ?? [];
-  const subtitlesShowing = useMediaSelector((state) => state.mediaSubtitlesShowing) ?? [];
-  const hasSubtitles = subtitlesList.length > 0;
-  const isEnabled = subtitlesShowing.length > 0;
+interface SubtitlesButtonContextValue {
+  isEnabled: boolean;
+  hasSubtitles: boolean;
+  toggleSubtitles: () => void;
+}
 
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (!hasSubtitles) return;
+const SubtitlesButtonContext = createContext<SubtitlesButtonContextValue | null>(null);
 
-    const type = isEnabled
-      ? MediaActionTypes.MEDIA_DISABLE_SUBTITLES_REQUEST
-      : MediaActionTypes.MEDIA_SHOW_SUBTITLES_REQUEST;
-    const detail = isEnabled ? subtitlesShowing : [subtitlesList[0]];
-    dispatch({ type, detail });
-    onClick?.(e);
-  };
-
-  // Render props pattern
-  if (typeof children === 'function') {
-    return (
-      <>
-        {children({
-          isEnabled,
-          hasSubtitles,
-          onClick: handleClick,
-        })}
-      </>
-    );
+function useSubtitlesButtonContext() {
+  const context = useContext(SubtitlesButtonContext);
+  if (!context) {
+    throw new Error('SubtitlesButton compound components must be used within SubtitlesButton.Root');
   }
+  return context;
+}
+
+interface SubtitlesButtonRootProps {
+  children: React.ReactNode;
+}
+
+function SubtitlesButtonRoot({ children }: SubtitlesButtonRootProps) {
+  const { isEnabled, hasSubtitles, toggleSubtitles } = useMediaSubtitlesToggle();
+
+  return (
+    <SubtitlesButtonContext.Provider value={{ isEnabled, hasSubtitles, toggleSubtitles }}>
+      {children}
+    </SubtitlesButtonContext.Provider>
+  );
+}
+
+interface ConditionalProps extends Omit<MediaSubtitlesButtonProps, 'children'> {
+  children?: React.ReactNode;
+}
+
+function Enabled(props: ConditionalProps) {
+  const { children, asChild, ...restProps } = props;
+  const { isEnabled, hasSubtitles, toggleSubtitles } = useSubtitlesButtonContext();
+
+  if (!isEnabled) return null;
 
   const Comp = asChild ? Slot : 'button';
 
-  return (
-    <Comp
-      type="button"
-      {...restProps}
-      onClick={handleClick}
-      disabled={!hasSubtitles}
-      aria-label={isEnabled ? 'Disable Subtitles' : 'Enable Subtitles'}
-    >
-      {children ?? (isEnabled ? 'Disable Captions' : 'Enable Captions')}
-    </Comp>
-  );
+  const baseProps: React.ComponentPropsWithoutRef<'button'> = {
+    type: 'button',
+    onClick: toggleSubtitles,
+    disabled: !hasSubtitles,
+    'aria-label': 'Disable Subtitles',
+  };
+
+  const mergedProps = mergeProps(baseProps, restProps);
+
+  return <Comp {...mergedProps}>{children}</Comp>;
+}
+
+function Disabled(props: ConditionalProps) {
+  const { children, asChild, ...restProps } = props;
+  const { isEnabled, hasSubtitles, toggleSubtitles } = useSubtitlesButtonContext();
+
+  if (isEnabled) return null;
+
+  const Comp = asChild ? Slot : 'button';
+
+  const baseProps: React.ComponentPropsWithoutRef<'button'> = {
+    type: 'button',
+    onClick: toggleSubtitles,
+    disabled: !hasSubtitles,
+    'aria-label': 'Enable Subtitles',
+  };
+
+  const mergedProps = mergeProps(baseProps, restProps);
+
+  return <Comp {...mergedProps}>{children}</Comp>;
+}
+
+function Available(props: ConditionalProps) {
+  const { children, asChild, ...restProps } = props;
+  const { hasSubtitles, toggleSubtitles } = useSubtitlesButtonContext();
+
+  if (!hasSubtitles) return null;
+
+  const Comp = asChild ? Slot : 'button';
+
+  const baseProps: React.ComponentPropsWithoutRef<'button'> = {
+    type: 'button',
+    onClick: toggleSubtitles,
+    'aria-label': 'Toggle Subtitles',
+  };
+
+  const mergedProps = mergeProps(baseProps, restProps);
+
+  return <Comp {...mergedProps}>{children}</Comp>;
+}
+
+function NotAvailable(props: ConditionalProps) {
+  const { children, asChild, ...restProps } = props;
+  const { hasSubtitles, toggleSubtitles } = useSubtitlesButtonContext();
+
+  if (hasSubtitles) return null;
+
+  const Comp = asChild ? Slot : 'button';
+
+  const baseProps: React.ComponentPropsWithoutRef<'button'> = {
+    type: 'button',
+    onClick: toggleSubtitles,
+    disabled: true,
+    'aria-label': 'Subtitles Not Available',
+  };
+
+  const mergedProps = mergeProps(baseProps, restProps);
+
+  return <Comp {...mergedProps}>{children}</Comp>;
+}
+
+export const MediaSubtitlesButton = {
+  Root: SubtitlesButtonRoot,
+  Enabled,
+  Disabled,
+  Available,
+  NotAvailable,
 };

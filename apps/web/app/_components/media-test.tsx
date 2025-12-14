@@ -73,11 +73,14 @@ export function MediaTest() {
             </MediaPlayerLoading>
 
             <div className="flex gap-2">
-              <MediaPlayButton className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-                {({ isPaused }) => (
-                  <span>{isPaused ? '▶️ Play' : '⏸️ Pause'}</span>
-                )}
-              </MediaPlayButton>
+              <MediaPlayButton.Root>
+                <MediaPlayButton.Paused className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                  <span>▶️ Play</span>
+                </MediaPlayButton.Paused>
+                <MediaPlayButton.Playing className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                  <span>⏸️ Pause</span>
+                </MediaPlayButton.Playing>
+              </MediaPlayButton.Root>
             </div>
           </div>
         </MediaProviderWrapper>
@@ -124,11 +127,14 @@ export function MediaTest() {
               }
             </MediaPlayerError>
 
-            <MediaPlayButton className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-              {({ isPaused }) => (
-                <span>{isPaused ? '▶️ Play' : '⏸️ Pause'}</span>
-              )}
-            </MediaPlayButton>
+            <MediaPlayButton.Root>
+              <MediaPlayButton.Paused className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                <span>▶️ Play</span>
+              </MediaPlayButton.Paused>
+              <MediaPlayButton.Playing className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                <span>⏸️ Pause</span>
+              </MediaPlayButton.Playing>
+            </MediaPlayButton.Root>
           </div>
         </MediaProviderWrapper>
       </div>
@@ -149,7 +155,10 @@ export function MediaTest() {
             {/* Default Error UI */}
             <MediaPlayerError className="absolute inset-0 bg-red-50" />
 
-            <MediaPlayButton />
+            <MediaPlayButton.Root>
+              <MediaPlayButton.Paused className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Play</MediaPlayButton.Paused>
+              <MediaPlayButton.Playing className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Pause</MediaPlayButton.Playing>
+            </MediaPlayButton.Root>
           </div>
         </MediaProviderWrapper>
       </div>
@@ -189,11 +198,14 @@ export function MediaTest() {
               )}
             </MediaPlayerLoading>
 
-            <MediaPlayButton className="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600">
-              {({ isPaused }) => (
-                <span>{isPaused ? '▶️ Play' : '⏸️ Pause'}</span>
-              )}
-            </MediaPlayButton>
+            <MediaPlayButton.Root>
+              <MediaPlayButton.Paused className="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600">
+                <span>▶️ Play</span>
+              </MediaPlayButton.Paused>
+              <MediaPlayButton.Playing className="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600">
+                <span>⏸️ Pause</span>
+              </MediaPlayButton.Playing>
+            </MediaPlayButton.Root>
           </div>
         </MediaProviderWrapper>
       </div>

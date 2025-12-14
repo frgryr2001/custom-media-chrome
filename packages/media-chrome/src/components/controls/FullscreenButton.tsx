@@ -1,37 +1,82 @@
-import React from 'react';
-import { useMediaDispatch, useMediaSelector } from 'media-chrome/react/media-store';
-import { MediaActionTypes } from '../../types';
+import React, { createContext, useContext } from 'react';
 import type { MediaFullscreenButtonProps } from '../../types';
 import { Slot } from '../../utils/Slot';
+import { mergeProps } from '../../utils/merge-props';
+import { useMediaFullscreenToggle } from '../../hooks';
 
-export const MediaFullscreenButton: React.FC<MediaFullscreenButtonProps> = (props) => {
-  const { children, onClick, asChild, ...restProps } = props;
-  const dispatch = useMediaDispatch();
-  const isFullscreen = useMediaSelector((state) => state.mediaIsFullscreen) ?? false;
+interface FullscreenButtonContextValue {
+  isFullscreen: boolean;
+  toggleFullscreen: () => void;
+}
 
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    const type = isFullscreen
-      ? MediaActionTypes.MEDIA_EXIT_FULLSCREEN_REQUEST
-      : MediaActionTypes.MEDIA_ENTER_FULLSCREEN_REQUEST;
-    dispatch({ type });
-    onClick?.(e);
-  };
+const FullscreenButtonContext = createContext<FullscreenButtonContextValue | null>(null);
 
-  // Render props pattern
-  if (typeof children === 'function') {
-    return <>{children({ isFullscreen, onClick: handleClick })}</>;
+function useFullscreenButtonContext() {
+  const context = useContext(FullscreenButtonContext);
+  if (!context) {
+    throw new Error('FullscreenButton compound components must be used within FullscreenButton.Root');
   }
+  return context;
+}
+
+interface FullscreenButtonRootProps {
+  children: React.ReactNode;
+}
+
+function FullscreenButtonRoot({ children }: FullscreenButtonRootProps) {
+  const { isFullscreen, toggleFullscreen } = useMediaFullscreenToggle();
+
+  return (
+    <FullscreenButtonContext.Provider value={{ isFullscreen, toggleFullscreen }}>
+      {children}
+    </FullscreenButtonContext.Provider>
+  );
+}
+
+interface ConditionalProps extends Omit<MediaFullscreenButtonProps, 'children'> {
+  children?: React.ReactNode;
+}
+
+function Fullscreen(props: ConditionalProps) {
+  const { children, asChild, ...restProps } = props;
+  const { isFullscreen, toggleFullscreen } = useFullscreenButtonContext();
+
+  if (!isFullscreen) return null;
 
   const Comp = asChild ? Slot : 'button';
 
-  return (
-    <Comp
-      type="button"
-      {...restProps}
-      onClick={handleClick}
-      aria-label={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
-    >
-      {children ?? (isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen')}
-    </Comp>
-  );
+  const baseProps: React.ComponentPropsWithoutRef<'button'> = {
+    type: 'button',
+    onClick: toggleFullscreen,
+    'aria-label': 'Exit Fullscreen',
+  };
+
+  const mergedProps = mergeProps(baseProps, restProps);
+
+  return <Comp {...mergedProps}>{children}</Comp>;
+}
+
+function Normal(props: ConditionalProps) {
+  const { children, asChild, ...restProps } = props;
+  const { isFullscreen, toggleFullscreen } = useFullscreenButtonContext();
+
+  if (isFullscreen) return null;
+
+  const Comp = asChild ? Slot : 'button';
+
+  const baseProps: React.ComponentPropsWithoutRef<'button'> = {
+    type: 'button',
+    onClick: toggleFullscreen,
+    'aria-label': 'Enter Fullscreen',
+  };
+
+  const mergedProps = mergeProps(baseProps, restProps);
+
+  return <Comp {...mergedProps}>{children}</Comp>;
+}
+
+export const MediaFullscreenButton = {
+  Root: FullscreenButtonRoot,
+  Fullscreen,
+  Normal,
 };

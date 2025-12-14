@@ -1,37 +1,82 @@
-import React from 'react';
-import { useMediaDispatch, useMediaSelector } from 'media-chrome/react/media-store';
-import { MediaActionTypes } from '../../types';
+import React, { createContext, useContext } from 'react';
 import type { MediaPipButtonProps } from '../../types';
 import { Slot } from '../../utils/Slot';
+import { mergeProps } from '../../utils/merge-props';
+import { useMediaPipToggle } from '../../hooks';
 
-export const MediaPipButton: React.FC<MediaPipButtonProps> = (props) => {
-  const { children, onClick, asChild, ...restProps } = props;
-  const dispatch = useMediaDispatch();
-  const isPip = useMediaSelector((state) => state.mediaIsPip) ?? false;
+interface PipButtonContextValue {
+  isPip: boolean;
+  togglePip: () => void;
+}
 
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    const type = isPip
-      ? MediaActionTypes.MEDIA_EXIT_PIP_REQUEST
-      : MediaActionTypes.MEDIA_ENTER_PIP_REQUEST;
-    dispatch({ type });
-    onClick?.(e);
-  };
+const PipButtonContext = createContext<PipButtonContextValue | null>(null);
 
-  // Render props pattern
-  if (typeof children === 'function') {
-    return <>{children({ isPip, onClick: handleClick })}</>;
+function usePipButtonContext() {
+  const context = useContext(PipButtonContext);
+  if (!context) {
+    throw new Error('PipButton compound components must be used within PipButton.Root');
   }
+  return context;
+}
+
+interface PipButtonRootProps {
+  children: React.ReactNode;
+}
+
+function PipButtonRoot({ children }: PipButtonRootProps) {
+  const { isPip, togglePip } = useMediaPipToggle();
+
+  return (
+    <PipButtonContext.Provider value={{ isPip, togglePip }}>
+      {children}
+    </PipButtonContext.Provider>
+  );
+}
+
+interface ConditionalProps extends Omit<MediaPipButtonProps, 'children'> {
+  children?: React.ReactNode;
+}
+
+function Pip(props: ConditionalProps) {
+  const { children, asChild, ...restProps } = props;
+  const { isPip, togglePip } = usePipButtonContext();
+
+  if (!isPip) return null;
 
   const Comp = asChild ? Slot : 'button';
 
-  return (
-    <Comp
-      type="button"
-      {...restProps}
-      onClick={handleClick}
-      aria-label={isPip ? 'Exit Picture-in-Picture' : 'Enter Picture-in-Picture'}
-    >
-      {children ?? (isPip ? 'Exit PiP' : 'Enter PiP')}
-    </Comp>
-  );
+  const baseProps: React.ComponentPropsWithoutRef<'button'> = {
+    type: 'button',
+    onClick: togglePip,
+    'aria-label': 'Exit Picture-in-Picture',
+  };
+
+  const mergedProps = mergeProps(baseProps, restProps);
+
+  return <Comp {...mergedProps}>{children}</Comp>;
+}
+
+function Normal(props: ConditionalProps) {
+  const { children, asChild, ...restProps } = props;
+  const { isPip, togglePip } = usePipButtonContext();
+
+  if (isPip) return null;
+
+  const Comp = asChild ? Slot : 'button';
+
+  const baseProps: React.ComponentPropsWithoutRef<'button'> = {
+    type: 'button',
+    onClick: togglePip,
+    'aria-label': 'Enter Picture-in-Picture',
+  };
+
+  const mergedProps = mergeProps(baseProps, restProps);
+
+  return <Comp {...mergedProps}>{children}</Comp>;
+}
+
+export const MediaPipButton = {
+  Root: PipButtonRoot,
+  Pip,
+  Normal,
 };

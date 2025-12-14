@@ -1,37 +1,82 @@
-import React from 'react';
-import { useMediaDispatch, useMediaSelector } from 'media-chrome/react/media-store';
-import { MediaActionTypes } from '../../types';
+import React, { createContext, useContext } from 'react';
 import type { MediaPlayButtonProps } from '../../types';
 import { Slot } from '../../utils/Slot';
+import { mergeProps } from '../../utils/merge-props';
+import { useMediaPlayToggle } from '../../hooks';
 
-export const MediaPlayButton: React.FC<MediaPlayButtonProps> = (props) => {
-  const { children, onClick, asChild, ...restProps } = props;
-  const dispatch = useMediaDispatch();
-  const isPaused = useMediaSelector((state) => state.mediaPaused) ?? true;
+interface PlayButtonContextValue {
+  isPaused: boolean;
+  togglePlay: () => void;
+}
 
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    const type = isPaused
-      ? MediaActionTypes.MEDIA_PLAY_REQUEST
-      : MediaActionTypes.MEDIA_PAUSE_REQUEST;
-    dispatch({ type });
-    onClick?.(e);
-  };
+const PlayButtonContext = createContext<PlayButtonContextValue | null>(null);
 
-  // Render props pattern
-  if (typeof children === 'function') {
-    return <>{children({ isPaused, onClick: handleClick })}</>;
+function usePlayButtonContext() {
+  const context = useContext(PlayButtonContext);
+  if (!context) {
+    throw new Error('PlayButton compound components must be used within PlayButton.Root');
   }
+  return context;
+}
+
+interface PlayButtonRootProps {
+  children: React.ReactNode;
+}
+
+function PlayButtonRoot({ children }: PlayButtonRootProps) {
+  const { isPaused, togglePlay } = useMediaPlayToggle();
+
+  return (
+    <PlayButtonContext.Provider value={{ isPaused, togglePlay }}>
+      {children}
+    </PlayButtonContext.Provider>
+  );
+}
+
+interface ConditionalProps extends Omit<MediaPlayButtonProps, 'children'> {
+  children?: React.ReactNode;
+}
+
+function Paused(props: ConditionalProps) {
+  const { children, asChild, ...restProps } = props;
+  const { isPaused, togglePlay } = usePlayButtonContext();
+
+  if (!isPaused) return null;
 
   const Comp = asChild ? Slot : 'button';
 
-  return (
-    <Comp
-      type="button"
-      {...restProps}
-      onClick={handleClick}
-      aria-label={isPaused ? 'Play' : 'Pause'}
-    >
-      {children ?? (isPaused ? 'Play' : 'Pause')}
-    </Comp>
-  );
+  const baseProps: React.ComponentPropsWithoutRef<'button'> = {
+    type: 'button',
+    onClick: togglePlay,
+    'aria-label': 'Play',
+  };
+
+  const mergedProps = mergeProps(baseProps, restProps);
+
+  return <Comp {...mergedProps}>{children}</Comp>;
+}
+
+function Playing(props: ConditionalProps) {
+  const { children, asChild, ...restProps } = props;
+  const { isPaused, togglePlay } = usePlayButtonContext();
+
+  if (isPaused) return null;
+
+  const Comp = asChild ? Slot : 'button';
+
+  const baseProps: React.ComponentPropsWithoutRef<'button'> = {
+    type: 'button',
+    onClick: togglePlay,
+    'aria-label': 'Pause',
+  };
+
+  const mergedProps = mergeProps(baseProps, restProps);
+
+  return <Comp {...mergedProps}>{children}</Comp>;
+}
+
+export const MediaPlayButton = {
+  Root: PlayButtonRoot,
+  Paused,
+  Playing,
 };

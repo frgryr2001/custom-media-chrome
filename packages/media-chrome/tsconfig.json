@@ -8,7 +8,11 @@
     "isolatedModules": true,
     "resolveJsonModule": true,
     "moduleResolution": "bundler",
-    "useDefineForClassFields": true
+    "useDefineForClassFields": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "declaration": true,
+    "declarationMap": true
   },
   "include": ["src"]
 }

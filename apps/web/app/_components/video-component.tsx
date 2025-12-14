@@ -16,17 +16,15 @@ export function VideoComponent() {
     <div className="w-full max-w-4xl mx-auto">
       <MediaProviderWrapper className="overflow-hidden">
         <div className="relative aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-slate-200/60">
-          <MediaPlayButton asChild>
-            {({ isPaused, onClick }) => (
-              <div onClick={onClick} className={`w-full h-full absolute top-0 left-0 flex items-center justify-center cursor-pointer transition-opacity ${isPaused ? 'opacity-0 hover:opacity-20' : 'opacity-100'}`}>
-                <MediaVideo
-                  src="https://stream.mux.com/DS00Spx1CV902MCtPj5WknGlR102V5HFkDe/high.mp4"
-                  muted
-                  className="w-full h-full object-cover cursor-pointer"
-                />
-              </div>
-            )}
-          </MediaPlayButton>
+          <MediaVideo
+            src="https://stream.mux.com/DS00Spx1CV902MCtPj5WknGlR102V5HFkDe/high.mp4"
+            muted
+            className="w-full h-full object-cover cursor-pointer"
+          />
+          <MediaPlayButton.Root>
+            <MediaPlayButton.Paused className="w-full h-full absolute top-0 left-0 flex items-center justify-center cursor-pointer transition-opacity opacity-0 hover:opacity-20" />
+            <MediaPlayButton.Playing className="w-full h-full absolute top-0 left-0 flex items-center justify-center cursor-pointer transition-opacity opacity-100" />
+          </MediaPlayButton.Root>
 
           {/* Video Controls Overlay */}
           <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-6">
@@ -67,25 +65,20 @@ export function VideoComponent() {
 
                 {/* Volume Controls */}
                 <div className="flex items-center gap-2">
-                  <MediaMuteButton>
-                    {({ isMuted, volumeLevel, onClick }) => (
-                      <button
-                        onClick={onClick}
-                        className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm flex items-center justify-center transition-colors"
-                        aria-label={isMuted ? 'Unmute' : 'Mute'}
-                      >
-                        <span className="text-base text-white">
-                          {isMuted
-                            ? '🔇'
-                            : volumeLevel === 'high'
-                              ? '🔊'
-                              : volumeLevel === 'medium'
-                                ? '🔉'
-                                : '🔈'}
-                        </span>
-                      </button>
-                    )}
-                  </MediaMuteButton>
+                  <MediaMuteButton.Root>
+                    <MediaMuteButton.Muted className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm flex items-center justify-center transition-colors">
+                      <span className="text-base text-white">🔇</span>
+                    </MediaMuteButton.Muted>
+                    <MediaMuteButton.VolumeHigh className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm flex items-center justify-center transition-colors">
+                      <span className="text-base text-white">🔊</span>
+                    </MediaMuteButton.VolumeHigh>
+                    <MediaMuteButton.VolumeMedium className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm flex items-center justify-center transition-colors">
+                      <span className="text-base text-white">🔉</span>
+                    </MediaMuteButton.VolumeMedium>
+                    <MediaMuteButton.VolumeLow className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm flex items-center justify-center transition-colors">
+                      <span className="text-base text-white">🔈</span>
+                    </MediaMuteButton.VolumeLow>
+                  </MediaMuteButton.Root>
                   <MediaVolumeRange>
                     {({ volume, onChange }) => (
                       <div className="w-20 relative group">
@@ -113,35 +106,23 @@ export function VideoComponent() {
 
               {/* Fullscreen Button */}
               <div className="flex items-center gap-2">
-                <MediaFullscreenButton>
-                  {({ isFullscreen, onClick }) => (
-                    <button
-                      onClick={onClick}
-                      className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm flex items-center justify-center transition-colors"
-                      aria-label={
-                        isFullscreen ? 'Exit fullscreen' : 'Fullscreen'
-                      }
-                    >
-                      <span className="text-base text-white">
-                        {isFullscreen ? '⛶' : '⛶'}
-                      </span>
-                    </button>
-                  )}
-                </MediaFullscreenButton>
+                <MediaFullscreenButton.Root>
+                  <MediaFullscreenButton.Fullscreen className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm flex items-center justify-center transition-colors">
+                    <span className="text-base text-white">⛶</span>
+                  </MediaFullscreenButton.Fullscreen>
+                  <MediaFullscreenButton.Normal className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm flex items-center justify-center transition-colors">
+                    <span className="text-base text-white">⛶</span>
+                  </MediaFullscreenButton.Normal>
+                </MediaFullscreenButton.Root>
 
-                <MediaPlayButton>
-                  {({ isPaused, onClick }) => (
-                    <button
-                      onClick={onClick}
-                      className="w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm flex items-center justify-center transition-colors"
-                      aria-label={isPaused ? 'Play' : 'Pause'}
-                    >
-                      <span className="text-xl text-white">
-                        {isPaused ? '▶️' : '⏸️'}
-                      </span>
-                    </button>
-                  )}
-                </MediaPlayButton>
+                <MediaPlayButton.Root>
+                  <MediaPlayButton.Paused className="w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm flex items-center justify-center transition-colors">
+                    <span className="text-xl text-white">▶️</span>
+                  </MediaPlayButton.Paused>
+                  <MediaPlayButton.Playing className="w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm flex items-center justify-center transition-colors">
+                    <span className="text-xl text-white">⏸️</span>
+                  </MediaPlayButton.Playing>
+                </MediaPlayButton.Root>
               </div>
             </div>
           </div>

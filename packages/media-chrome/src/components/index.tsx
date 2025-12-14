@@ -3,7 +3,7 @@ export { MediaProviderWrapper } from './MediaProviderWrapper';
 export { MediaVideo } from './MediaVideo';
 export { MediaAudio } from './MediaAudio';
 
-// Export controls
+// Export controls (now using compound pattern)
 export { MediaPlayButton } from './controls/PlayButton';
 export { MediaMuteButton } from './controls/MuteButton';
 export { MediaTimeRange } from './controls/TimeRange';

@@ -2,9 +2,10 @@ import React, { useDeferredValue, useState, useEffect } from 'react';
 import { useMediaDispatch, useMediaSelector } from 'media-chrome/react/media-store';
 import { MediaActionTypes } from '../../types';
 import type { MediaTimeRangeProps } from '../../types';
+import { mergeProps } from '../../utils/merge-props';
 
 export const MediaTimeRange: React.FC<MediaTimeRangeProps> = (props) => {
-  const { children, className, style, onChange } = props;
+  const { children, ...restProps } = props;
   const dispatch = useMediaDispatch();
   const currentTime = useMediaSelector((state) => state.mediaCurrentTime) ?? 0;
   const duration = useMediaSelector((state) => state.mediaDuration) ?? 0;
@@ -24,7 +25,6 @@ export const MediaTimeRange: React.FC<MediaTimeRangeProps> = (props) => {
       type: MediaActionTypes.MEDIA_SEEK_REQUEST,
       detail: time,
     });
-    onChange?.(time);
   };
 
   if (children) {
@@ -40,17 +40,17 @@ export const MediaTimeRange: React.FC<MediaTimeRangeProps> = (props) => {
     );
   }
 
-  return (
-    <input
-      type="range"
-      min={0}
-      max={Number.isNaN(duration) ? 0 : duration}
-      value={localTime}
-      step={0.1}
-      onChange={(e) => handleChange(+e.target.value)}
-      className={className}
-      style={style}
-      aria-label="Seek"
-    />
-  );
+  const baseProps = {
+    type: 'range' as const,
+    min: 0,
+    max: Number.isNaN(duration) ? 0 : duration,
+    value: localTime,
+    step: 0.1,
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => handleChange(+e.target.value),
+    'aria-label': 'Seek',
+  };
+
+  const mergedProps = mergeProps(baseProps, restProps);
+
+  return <input {...mergedProps} />;
 };

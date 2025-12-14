@@ -54,16 +54,14 @@ export function AudioTest() {
               </div>
             )}
           </MediaTimeRange>
-          <MediaPlayButton className='flex-1!'>
-            {({ isPaused, onClick }) => (
-              <button
-                onClick={onClick}
-                className="w-12 h-12 rounded-full bg-linear-to-br from-violet-500 via-purple-500 to-fuchsia-500 hover:from-violet-600 hover:via-purple-600 hover:to-fuchsia-600 active:scale-95 text-white flex items-center justify-center shadow-lg transition-all"
-              >
-                <span className="text-lg">{isPaused ? '▶️' : '⏸️'}</span>
-              </button>
-            )}
-          </MediaPlayButton>
+          <MediaPlayButton.Root>
+            <MediaPlayButton.Paused className="w-12 h-12 rounded-full bg-linear-to-br from-violet-500 via-purple-500 to-fuchsia-500 hover:from-violet-600 hover:via-purple-600 hover:to-fuchsia-600 active:scale-95 text-white flex items-center justify-center shadow-lg transition-all">
+              <span className="text-lg">▶️</span>
+            </MediaPlayButton.Paused>
+            <MediaPlayButton.Playing className="w-12 h-12 rounded-full bg-linear-to-br from-violet-500 via-purple-500 to-fuchsia-500 hover:from-violet-600 hover:via-purple-600 hover:to-fuchsia-600 active:scale-95 text-white flex items-center justify-center shadow-lg transition-all">
+              <span className="text-lg">⏸️</span>
+            </MediaPlayButton.Playing>
+          </MediaPlayButton.Root>
         </div>
       </MediaProviderWrapper>
     </div>

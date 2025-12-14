@@ -59,16 +59,14 @@ export function AudioComponent() {
               </MediaTimeRange>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <MediaMuteButton>
-                    {({ isMuted, onClick }) => (
-                      <button
-                        onClick={onClick}
-                        className="w-8 h-8 rounded-full bg-slate-50 hover:bg-slate-100 flex items-center justify-center transition-colors"
-                      >
-                        <span className="text-sm">{isMuted ? '🔇' : '🔊'}</span>
-                      </button>
-                    )}
-                  </MediaMuteButton>
+                  <MediaMuteButton.Root>
+                    <MediaMuteButton.Muted className="w-8 h-8 rounded-full bg-slate-50 hover:bg-slate-100 flex items-center justify-center transition-colors">
+                      <span className="text-sm">🔇</span>
+                    </MediaMuteButton.Muted>
+                    <MediaMuteButton.Unmuted className="w-8 h-8 rounded-full bg-slate-50 hover:bg-slate-100 flex items-center justify-center transition-colors">
+                      <span className="text-sm">🔊</span>
+                    </MediaMuteButton.Unmuted>
+                  </MediaMuteButton.Root>
                   <MediaVolumeRange>
                     {({ volume, onChange }) => (
                       <div className="w-16 relative">
@@ -91,16 +89,14 @@ export function AudioComponent() {
                     )}
                   </MediaVolumeRange>
                 </div>
-                <MediaPlayButton>
-                  {({ isPaused, onClick }) => (
-                    <button
-                      onClick={onClick}
-                      className="w-12 h-12 rounded-full bg-linear-to-br from-violet-500 via-purple-500 to-fuchsia-500 hover:from-violet-600 hover:via-purple-600 hover:to-fuchsia-600 active:scale-95 text-white flex items-center justify-center shadow-lg transition-all"
-                    >
-                      <span className="text-lg">{isPaused ? '▶️' : '⏸️'}</span>
-                    </button>
-                  )}
-                </MediaPlayButton>
+                <MediaPlayButton.Root>
+                  <MediaPlayButton.Paused className="w-12 h-12 rounded-full bg-linear-to-br from-violet-500 via-purple-500 to-fuchsia-500 hover:from-violet-600 hover:via-purple-600 hover:to-fuchsia-600 active:scale-95 text-white flex items-center justify-center shadow-lg transition-all">
+                    <span className="text-lg">▶️</span>
+                  </MediaPlayButton.Paused>
+                  <MediaPlayButton.Playing className="w-12 h-12 rounded-full bg-linear-to-br from-violet-500 via-purple-500 to-fuchsia-500 hover:from-violet-600 hover:via-purple-600 hover:to-fuchsia-600 active:scale-95 text-white flex items-center justify-center shadow-lg transition-all">
+                    <span className="text-lg">⏸️</span>
+                  </MediaPlayButton.Playing>
+                </MediaPlayButton.Root>
               </div>
             </div>
           </div>
