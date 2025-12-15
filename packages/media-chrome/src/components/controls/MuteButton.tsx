@@ -4,13 +4,15 @@ import { Slot } from '../../utils/Slot';
 import { mergeProps } from '../../utils/merge-props';
 import { useMediaMuteToggle } from '../../hooks';
 
-interface MuteButtonRootProps {
-  children?: React.ReactNode;
-  className?: string;
+interface MuteButtonRootProps extends React.ComponentPropsWithoutRef<'div'> {
+  asChild?: boolean;
 }
 
-function MuteButtonRoot({ children, className }: MuteButtonRootProps) {
-  return className ? <div className={className}>{children}</div> : <>{children}</>;
+function MuteButtonRoot(props: MuteButtonRootProps) {
+  const { asChild, ...restProps } = props;
+  const Comp = asChild ? Slot : 'div';
+
+  return <Comp {...restProps} />;
 }
 
 interface ConditionalProps extends Omit<MediaMuteButtonProps, 'children'> {

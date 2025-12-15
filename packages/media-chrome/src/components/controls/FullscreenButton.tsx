@@ -4,13 +4,16 @@ import { Slot } from '../../utils/Slot';
 import { mergeProps } from '../../utils/merge-props';
 import { useMediaFullscreenToggle } from '../../hooks';
 
-interface FullscreenButtonRootProps {
-  children?: React.ReactNode;
-  className?: string;
+interface FullscreenButtonRootProps  extends React.ComponentPropsWithoutRef<'div'>{
+    asChild?: boolean;
 }
 
-function FullscreenButtonRoot({ children, className }: FullscreenButtonRootProps) {
-  return className ? <div className={className}>{children}</div> : <>{children}</>;
+
+function FullscreenButtonRoot(props: FullscreenButtonRootProps) {
+  const { asChild, ...restProps } = props;
+  const Comp = asChild ? Slot : 'div';
+
+  return <Comp {...restProps} />
 }
 
 interface ConditionalProps extends Omit<MediaFullscreenButtonProps, 'children'> {

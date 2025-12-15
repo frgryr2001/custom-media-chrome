@@ -4,13 +4,15 @@ import { Slot } from '../../utils/Slot';
 import { mergeProps } from '../../utils/merge-props';
 import { useMediaPlayToggle } from '../../hooks';
 
-interface PlayButtonRootProps {
-  children?: React.ReactNode;
-  className?: string;
+interface PlayButtonRootProps extends React.ComponentPropsWithoutRef<'div'> {
+  asChild?: boolean;
 }
 
-function PlayButtonRoot({ children, className }: PlayButtonRootProps) {
-  return className ? <div className={className}>{children}</div> : <>{children}</>;
+function PlayButtonRoot(props: PlayButtonRootProps) {
+  const { asChild, ...restProps } = props;
+  const Comp = asChild ? Slot : 'div';
+
+  return <Comp {...restProps} />;
 }
 
 interface ConditionalProps extends Omit<MediaPlayButtonProps, 'children'> {

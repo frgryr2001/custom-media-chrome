@@ -4,13 +4,15 @@ import { Slot } from '../../utils/Slot';
 import { mergeProps } from '../../utils/merge-props';
 import { useMediaPipToggle } from '../../hooks';
 
-interface PipButtonRootProps {
-  children?: React.ReactNode;
-  className?: string;
+interface PipButtonRootProps extends React.ComponentPropsWithoutRef<'div'> {
+  asChild?: boolean;
 }
 
-function PipButtonRoot({ children, className }: PipButtonRootProps) {
-  return className ? <div className={className}>{children}</div> : <>{children}</>;
+function PipButtonRoot(props: PipButtonRootProps) {
+  const { asChild, ...restProps } = props;
+  const Comp = asChild ? Slot : 'div';
+
+  return <Comp {...restProps} />;
 }
 
 interface ConditionalProps extends Omit<MediaPipButtonProps, 'children'> {

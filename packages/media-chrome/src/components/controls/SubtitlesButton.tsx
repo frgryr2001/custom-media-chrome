@@ -4,13 +4,15 @@ import { Slot } from '../../utils/Slot';
 import { mergeProps } from '../../utils/merge-props';
 import { useMediaSubtitlesToggle } from '../../hooks';
 
-interface SubtitlesButtonRootProps {
-  children?: React.ReactNode;
-  className?: string;
+interface SubtitlesButtonRootProps extends React.ComponentPropsWithoutRef<'div'> {
+  asChild?: boolean;
 }
 
-function SubtitlesButtonRoot({ children, className }: SubtitlesButtonRootProps) {
-  return className ? <div className={className}>{children}</div> : <>{children}</>;
+function SubtitlesButtonRoot(props: SubtitlesButtonRootProps) {
+  const { asChild, ...restProps } = props;
+  const Comp = asChild ? Slot : 'div';
+
+  return <Comp {...restProps} />;
 }
 
 interface ConditionalProps extends Omit<MediaSubtitlesButtonProps, 'children'> {
