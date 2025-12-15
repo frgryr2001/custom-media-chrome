@@ -1,36 +1,16 @@
-import React, { createContext, useContext } from 'react';
+import React from 'react';
 import type { MediaFullscreenButtonProps } from '../../types';
 import { Slot } from '../../utils/Slot';
 import { mergeProps } from '../../utils/merge-props';
 import { useMediaFullscreenToggle } from '../../hooks';
 
-interface FullscreenButtonContextValue {
-  isFullscreen: boolean;
-  toggleFullscreen: () => void;
-}
-
-const FullscreenButtonContext = createContext<FullscreenButtonContextValue | null>(null);
-
-function useFullscreenButtonContext() {
-  const context = useContext(FullscreenButtonContext);
-  if (!context) {
-    throw new Error('FullscreenButton compound components must be used within FullscreenButton.Root');
-  }
-  return context;
-}
-
 interface FullscreenButtonRootProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
+  className?: string;
 }
 
-function FullscreenButtonRoot({ children }: FullscreenButtonRootProps) {
-  const { isFullscreen, toggleFullscreen } = useMediaFullscreenToggle();
-
-  return (
-    <FullscreenButtonContext.Provider value={{ isFullscreen, toggleFullscreen }}>
-      {children}
-    </FullscreenButtonContext.Provider>
-  );
+function FullscreenButtonRoot({ children, className }: FullscreenButtonRootProps) {
+  return className ? <div className={className}>{children}</div> : <>{children}</>;
 }
 
 interface ConditionalProps extends Omit<MediaFullscreenButtonProps, 'children'> {
@@ -39,7 +19,7 @@ interface ConditionalProps extends Omit<MediaFullscreenButtonProps, 'children'> 
 
 function Fullscreen(props: ConditionalProps) {
   const { children, asChild, ...restProps } = props;
-  const { isFullscreen, toggleFullscreen } = useFullscreenButtonContext();
+  const { isFullscreen, toggleFullscreen } = useMediaFullscreenToggle();
 
   if (!isFullscreen) return null;
 
@@ -58,7 +38,7 @@ function Fullscreen(props: ConditionalProps) {
 
 function Normal(props: ConditionalProps) {
   const { children, asChild, ...restProps } = props;
-  const { isFullscreen, toggleFullscreen } = useFullscreenButtonContext();
+  const { isFullscreen, toggleFullscreen } = useMediaFullscreenToggle();
 
   if (isFullscreen) return null;
 

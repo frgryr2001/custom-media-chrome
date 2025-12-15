@@ -1,37 +1,16 @@
-import React, { createContext, useContext } from 'react';
+import React from 'react';
 import type { MediaSubtitlesButtonProps } from '../../types';
 import { Slot } from '../../utils/Slot';
 import { mergeProps } from '../../utils/merge-props';
 import { useMediaSubtitlesToggle } from '../../hooks';
 
-interface SubtitlesButtonContextValue {
-  isEnabled: boolean;
-  hasSubtitles: boolean;
-  toggleSubtitles: () => void;
-}
-
-const SubtitlesButtonContext = createContext<SubtitlesButtonContextValue | null>(null);
-
-function useSubtitlesButtonContext() {
-  const context = useContext(SubtitlesButtonContext);
-  if (!context) {
-    throw new Error('SubtitlesButton compound components must be used within SubtitlesButton.Root');
-  }
-  return context;
-}
-
 interface SubtitlesButtonRootProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
+  className?: string;
 }
 
-function SubtitlesButtonRoot({ children }: SubtitlesButtonRootProps) {
-  const { isEnabled, hasSubtitles, toggleSubtitles } = useMediaSubtitlesToggle();
-
-  return (
-    <SubtitlesButtonContext.Provider value={{ isEnabled, hasSubtitles, toggleSubtitles }}>
-      {children}
-    </SubtitlesButtonContext.Provider>
-  );
+function SubtitlesButtonRoot({ children, className }: SubtitlesButtonRootProps) {
+  return className ? <div className={className}>{children}</div> : <>{children}</>;
 }
 
 interface ConditionalProps extends Omit<MediaSubtitlesButtonProps, 'children'> {
@@ -40,7 +19,7 @@ interface ConditionalProps extends Omit<MediaSubtitlesButtonProps, 'children'> {
 
 function Enabled(props: ConditionalProps) {
   const { children, asChild, ...restProps } = props;
-  const { isEnabled, hasSubtitles, toggleSubtitles } = useSubtitlesButtonContext();
+  const { isEnabled, hasSubtitles, toggleSubtitles } = useMediaSubtitlesToggle();
 
   if (!isEnabled) return null;
 
@@ -60,7 +39,7 @@ function Enabled(props: ConditionalProps) {
 
 function Disabled(props: ConditionalProps) {
   const { children, asChild, ...restProps } = props;
-  const { isEnabled, hasSubtitles, toggleSubtitles } = useSubtitlesButtonContext();
+  const { isEnabled, hasSubtitles, toggleSubtitles } = useMediaSubtitlesToggle();
 
   if (isEnabled) return null;
 
@@ -80,7 +59,7 @@ function Disabled(props: ConditionalProps) {
 
 function Available(props: ConditionalProps) {
   const { children, asChild, ...restProps } = props;
-  const { hasSubtitles, toggleSubtitles } = useSubtitlesButtonContext();
+  const { hasSubtitles, toggleSubtitles } = useMediaSubtitlesToggle();
 
   if (!hasSubtitles) return null;
 
@@ -99,7 +78,7 @@ function Available(props: ConditionalProps) {
 
 function NotAvailable(props: ConditionalProps) {
   const { children, asChild, ...restProps } = props;
-  const { hasSubtitles, toggleSubtitles } = useSubtitlesButtonContext();
+  const { hasSubtitles, toggleSubtitles } = useMediaSubtitlesToggle();
 
   if (hasSubtitles) return null;
 

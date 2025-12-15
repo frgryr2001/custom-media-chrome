@@ -1,36 +1,16 @@
-import React, { createContext, useContext } from 'react';
+import React from 'react';
 import type { MediaPipButtonProps } from '../../types';
 import { Slot } from '../../utils/Slot';
 import { mergeProps } from '../../utils/merge-props';
 import { useMediaPipToggle } from '../../hooks';
 
-interface PipButtonContextValue {
-  isPip: boolean;
-  togglePip: () => void;
-}
-
-const PipButtonContext = createContext<PipButtonContextValue | null>(null);
-
-function usePipButtonContext() {
-  const context = useContext(PipButtonContext);
-  if (!context) {
-    throw new Error('PipButton compound components must be used within PipButton.Root');
-  }
-  return context;
-}
-
 interface PipButtonRootProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
+  className?: string;
 }
 
-function PipButtonRoot({ children }: PipButtonRootProps) {
-  const { isPip, togglePip } = useMediaPipToggle();
-
-  return (
-    <PipButtonContext.Provider value={{ isPip, togglePip }}>
-      {children}
-    </PipButtonContext.Provider>
-  );
+function PipButtonRoot({ children, className }: PipButtonRootProps) {
+  return className ? <div className={className}>{children}</div> : <>{children}</>;
 }
 
 interface ConditionalProps extends Omit<MediaPipButtonProps, 'children'> {
@@ -39,7 +19,7 @@ interface ConditionalProps extends Omit<MediaPipButtonProps, 'children'> {
 
 function Pip(props: ConditionalProps) {
   const { children, asChild, ...restProps } = props;
-  const { isPip, togglePip } = usePipButtonContext();
+  const { isPip, togglePip } = useMediaPipToggle();
 
   if (!isPip) return null;
 
@@ -58,7 +38,7 @@ function Pip(props: ConditionalProps) {
 
 function Normal(props: ConditionalProps) {
   const { children, asChild, ...restProps } = props;
-  const { isPip, togglePip } = usePipButtonContext();
+  const { isPip, togglePip } = useMediaPipToggle();
 
   if (isPip) return null;
 

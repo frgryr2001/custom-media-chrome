@@ -1,36 +1,16 @@
-import React, { createContext, useContext } from 'react';
+import React from 'react';
 import type { MediaPlayButtonProps } from '../../types';
 import { Slot } from '../../utils/Slot';
 import { mergeProps } from '../../utils/merge-props';
 import { useMediaPlayToggle } from '../../hooks';
 
-interface PlayButtonContextValue {
-  isPaused: boolean;
-  togglePlay: () => void;
-}
-
-const PlayButtonContext = createContext<PlayButtonContextValue | null>(null);
-
-function usePlayButtonContext() {
-  const context = useContext(PlayButtonContext);
-  if (!context) {
-    throw new Error('PlayButton compound components must be used within PlayButton.Root');
-  }
-  return context;
-}
-
 interface PlayButtonRootProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
+  className?: string;
 }
 
-function PlayButtonRoot({ children }: PlayButtonRootProps) {
-  const { isPaused, togglePlay } = useMediaPlayToggle();
-
-  return (
-    <PlayButtonContext.Provider value={{ isPaused, togglePlay }}>
-      {children}
-    </PlayButtonContext.Provider>
-  );
+function PlayButtonRoot({ children, className }: PlayButtonRootProps) {
+  return className ? <div className={className}>{children}</div> : <>{children}</>;
 }
 
 interface ConditionalProps extends Omit<MediaPlayButtonProps, 'children'> {
@@ -39,7 +19,7 @@ interface ConditionalProps extends Omit<MediaPlayButtonProps, 'children'> {
 
 function Paused(props: ConditionalProps) {
   const { children, asChild, ...restProps } = props;
-  const { isPaused, togglePlay } = usePlayButtonContext();
+  const { isPaused, togglePlay } = useMediaPlayToggle();
 
   if (!isPaused) return null;
 
@@ -58,7 +38,7 @@ function Paused(props: ConditionalProps) {
 
 function Playing(props: ConditionalProps) {
   const { children, asChild, ...restProps } = props;
-  const { isPaused, togglePlay } = usePlayButtonContext();
+  const { isPaused, togglePlay } = useMediaPlayToggle();
 
   if (isPaused) return null;
 

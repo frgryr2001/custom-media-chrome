@@ -1,37 +1,16 @@
-import React, { createContext, useContext } from 'react';
+import React from 'react';
 import type { MediaMuteButtonProps } from '../../types';
 import { Slot } from '../../utils/Slot';
 import { mergeProps } from '../../utils/merge-props';
 import { useMediaMuteToggle } from '../../hooks';
 
-interface MuteButtonContextValue {
-  isMuted: boolean;
-  volumeLevel: string;
-  toggleMute: () => void;
-}
-
-const MuteButtonContext = createContext<MuteButtonContextValue | null>(null);
-
-function useMuteButtonContext() {
-  const context = useContext(MuteButtonContext);
-  if (!context) {
-    throw new Error('MuteButton compound components must be used within MuteButton.Root');
-  }
-  return context;
-}
-
 interface MuteButtonRootProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
+  className?: string;
 }
 
-function MuteButtonRoot({ children }: MuteButtonRootProps) {
-  const { isMuted, volumeLevel, toggleMute } = useMediaMuteToggle();
-
-  return (
-    <MuteButtonContext.Provider value={{ isMuted, volumeLevel, toggleMute }}>
-      {children}
-    </MuteButtonContext.Provider>
-  );
+function MuteButtonRoot({ children, className }: MuteButtonRootProps) {
+  return className ? <div className={className}>{children}</div> : <>{children}</>;
 }
 
 interface ConditionalProps extends Omit<MediaMuteButtonProps, 'children'> {
@@ -40,7 +19,7 @@ interface ConditionalProps extends Omit<MediaMuteButtonProps, 'children'> {
 
 function Muted(props: ConditionalProps) {
   const { children, asChild, ...restProps } = props;
-  const { isMuted, toggleMute } = useMuteButtonContext();
+  const { isMuted, toggleMute } = useMediaMuteToggle();
 
   if (!isMuted) return null;
 
@@ -59,7 +38,7 @@ function Muted(props: ConditionalProps) {
 
 function Unmuted(props: ConditionalProps) {
   const { children, asChild, ...restProps } = props;
-  const { isMuted, toggleMute } = useMuteButtonContext();
+  const { isMuted, toggleMute } = useMediaMuteToggle();
 
   if (isMuted) return null;
 
@@ -78,7 +57,7 @@ function Unmuted(props: ConditionalProps) {
 
 function VolumeHigh(props: ConditionalProps) {
   const { children, asChild, ...restProps } = props;
-  const { volumeLevel, toggleMute } = useMuteButtonContext();
+  const { volumeLevel, toggleMute } = useMediaMuteToggle();
 
   if (volumeLevel !== 'high') return null;
 
@@ -97,7 +76,7 @@ function VolumeHigh(props: ConditionalProps) {
 
 function VolumeMedium(props: ConditionalProps) {
   const { children, asChild, ...restProps } = props;
-  const { volumeLevel, toggleMute } = useMuteButtonContext();
+  const { volumeLevel, toggleMute } = useMediaMuteToggle();
 
   if (volumeLevel !== 'medium') return null;
 
@@ -116,7 +95,7 @@ function VolumeMedium(props: ConditionalProps) {
 
 function VolumeLow(props: ConditionalProps) {
   const { children, asChild, ...restProps } = props;
-  const { volumeLevel, toggleMute } = useMuteButtonContext();
+  const { volumeLevel, toggleMute } = useMediaMuteToggle();
 
   if (volumeLevel !== 'low') return null;
 
@@ -135,7 +114,7 @@ function VolumeLow(props: ConditionalProps) {
 
 function VolumeOff(props: ConditionalProps) {
   const { children, asChild, ...restProps } = props;
-  const { volumeLevel, toggleMute } = useMuteButtonContext();
+  const { volumeLevel, toggleMute } = useMediaMuteToggle();
 
   if (volumeLevel !== 'off') return null;
 
