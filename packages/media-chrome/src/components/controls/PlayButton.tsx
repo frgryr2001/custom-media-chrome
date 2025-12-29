@@ -29,7 +29,7 @@ function Paused(props: ConditionalProps) {
 
   const baseProps: React.ComponentPropsWithoutRef<'button'> = {
     type: 'button',
-    onClick: togglePlay,
+    onClick: () => togglePlay(),
     'aria-label': 'Play',
   };
 
@@ -48,7 +48,7 @@ function Playing(props: ConditionalProps) {
 
   const baseProps: React.ComponentPropsWithoutRef<'button'> = {
     type: 'button',
-    onClick: togglePlay,
+    onClick: () => togglePlay(),
     'aria-label': 'Pause',
   };
 

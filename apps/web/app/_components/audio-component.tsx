@@ -1,7 +1,6 @@
 
 import {
   MediaProviderWrapper,
-
   MediaPlayButton,
   MediaMuteButton,
   MediaTimeRange,
